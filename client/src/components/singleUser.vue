@@ -91,6 +91,8 @@ export default{
 methods: {
     // PUT request to update user information
     async updateUser() {
+        
+// this.getNearestData([...this.users[0].closestEvent, document.getElementById('startRegister').value])
       await fetch(`http://localhost:3000/api/users/edit/${this.$route.params.id}`, {
         method: 'PUT',
         headers: { 'Content-type': 'application/json' },
@@ -103,7 +105,11 @@ methods: {
                 eventStart: document.getElementById('startRegister').value,
                 eventEnd: document.getElementById('endRegister').value
             }],
-            eventCount: this.users[0].eventCount + 1
+            eventCount: this.users[0].eventCount + 1,
+            closestEvent: this.users[0].closestEvent === 'N/A' ? 
+                          [document.getElementById('startRegister').value] : 
+                          this.getNearestData([...this.users[0].closestEvent, 
+                            document.getElementById('startRegister').value])
             
         
         }),
@@ -116,6 +122,20 @@ methods: {
         console.error(err);
       });
     },
+        getNearestData(dataArr){
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const index = dataArr
+                .map((data, orginalIndex) => {
+                    const [y,m,d] = data.split('-');
+                    return{ sorter: new Date(y, m - 1, d), orginalIndex };
+                })
+                .sort((a, b) => a.sorter - b.sorter)
+                .find(item => item.sorter >= today)
+                ?.orginalIndex;
+            return dataArr[index] ;
+    }
 
   },
     computed: {

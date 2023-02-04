@@ -23,6 +23,7 @@ router.post('/', async (req, res) => {
       email: req.body.email,
       number: req.body.number,
       closestEvent: 'N/A',
+      eventCount:0,
       events:[],
       createdAt: new Date()
     });
@@ -41,10 +42,13 @@ router.put('/edit/:id', async (req, res) => {
   const email = req.body.email;
   const number = req.body.number;
   const events = req.body.events;
+  const eventCount = req.body.eventCount;
+  const closestEvent = req.body.closestEvent;
+
 
 
   try {
-    await updateUser(req.params.id, { name, surname, email, number, events});
+    await updateUser(req.params.id, { name, surname, email, number, events, eventCount, closestEvent});
 
     return res.status(200).send({ success: 'Editing done successfully!'});
   } catch (error) {
