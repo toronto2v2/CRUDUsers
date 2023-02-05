@@ -1,7 +1,7 @@
 // Import express and cors
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 
 // Middleware to pass an Object to JSON Object (in a request)
 app.use(express.json());
@@ -9,9 +9,9 @@ app.use(express.json());
 app.use(cors());
 
 // Application will use "/api/users" route as corresponding
-// Example: "/api/users/abc123", 
-const usersRouter = require('./routes/api/users');
-app.use('/api/users', usersRouter);
+// Example: "/api/users/abc123",
+const usersRouter = require("./routes/api/users");
+app.use("/api/users", usersRouter);
 
 // Start running server
 const port = process.env.PORT || 3000;

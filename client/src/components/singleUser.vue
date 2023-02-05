@@ -1,30 +1,53 @@
 <template>
     <div class="container">
-      <a href="http://localhost:8080" class="btn btn-primary mr-1">Back home</a>
+      <router-link :to="{path:'/'}" class="btn btn-primary mr-1">Back home</router-link>
 
-        <h3 v-if='this.users[0]' class="mt-5 mb-5 text-center text-primary">{{`${users[0].name} ${users[0].surname}`}}</h3>
+        <h3 v-if='this.users[0]' 
+            class="mt-5 mb-5 text-center text-primary">
+            {{`${users[0].name} ${users[0].surname}`}}
+        </h3>
+
         <h4 class="mt-2 mb-3 float-left text-primary">Events</h4>
-        <button v-on:click="showModal = !showModal" class="btn btn-lg btn-outline-primary float-right">Add new event</button>
+        <button v-on:click="showModal = !showModal" 
+                class="btn btn-lg btn-outline-primary float-right">
+                Add new event
+        </button>
 
         <table class="table table-striped">
         <thead>
-            <tr>
-            <th scope="col">#</th>
-            <th scope="col">Title</th>
-            <th scope="col">Description</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col"></th>
+            <tr @click="onFiltersClick($event)">
+                <th :data-filter='"default"' scope="col">#</th>
+                <th :data-filter='"eventTitle"' scope="col">Title</th>
+                <th :data-filter='"eventDescr"' scope="col">Description</th>
+                <th :data-filter='"eventStart"' scope="col">Start Date</th>
+                <th :data-filter='"eventEnd"' scope="col">End Date</th>
+                <th scope="col"></th>
             </tr>
         </thead>
-        <tbody v-if="users[0]">
+        <tbody v-if="users[0] && !filteredEvents">
             <!-- "v-for" directive to get API users -->
-            <tr v-for="(user, index) in users[0].events" :key="user._id" class="m-5">
+            <tr v-for="(user, index) in users[0].events" 
+                :key="user._id" class="m-5"
+                >
                 <th scope="row">{{ index + 1 }}</th>
-                <td>{{user.eventTitle}}</td>
-                <td>{{user.eventDescr}}</td>
-                <td>{{user.eventStart}}</td>
-                <td>{{user.eventEnd}}</td>
+                    <td>{{user.eventTitle}}</td>
+                    <td>{{user.eventDescr}}</td>
+                    <td>{{user.eventStart}}</td>
+                    <td>{{user.eventEnd}}</td>
+                <td></td>            
+            </tr>
+        </tbody>
+
+        <tbody v-if="users[0] && filteredEvents">
+            <!-- "v-for" directive to get API users -->
+            <tr v-for="(user, index) in filteredEvents[0].events" 
+                :key="user._id" class="m-5"
+                >
+                <th scope="row">{{ index + 1 }}</th>
+                    <td>{{user.eventTitle}}</td>
+                    <td>{{user.eventDescr}}</td>
+                    <td>{{user.eventStart}}</td>
+                    <td>{{user.eventEnd}}</td>
                 <td></td>
 
             
@@ -44,7 +67,10 @@
 
           <div class="form-group">
             <label for="descriptionRegister">Description</label>
-            <input required value="" name='surname' type="text" id="descriptionRegister" class="form-control"/>
+            <input required value="" 
+                   name='surname' 
+                   type="text" id="descriptionRegister" 
+                   class="form-control"/>
           </div>
     
           <div class="form-group">
@@ -58,8 +84,15 @@
           </div>
           
           <!-- when clicked, "showModal" becomes false -->
-          <button v-on:click.prevent="showModal = !showModal" class="btn btn-secondary mr-1">Cancel</button>
-          <button v-on:click="updateUser()"  type="submit" class="btn btn-primary">Submit</button> 
+          <button v-on:click.prevent="showModal = !showModal" 
+                  class="btn btn-secondary mr-1"
+                  >Cancel
+          </button>
+          <button v-on:click="updateUser()"  
+                  type="submit" 
+                  class="btn btn-primary"
+                  >Submit
+          </button> 
         </form>
       </div>
     </div>
@@ -69,12 +102,70 @@
 </template>
 
 <script>
+
+const filterByDateEvent = (activeFilter, originalUsers, current) => {
+        const filteredUsers = [{
+            ...originalUsers, 
+            events: originalUsers.events.map(iv =>  ({...iv})) 
+            }];
+
+    if(activeFilter){
+
+        filteredUsers[0].events.sort(
+            (a,b) => +a[current].replace(/\D/g, '') - +b[current].replace(/\D/g, '')
+        )
+
+    }else{
+        filteredUsers[0].events.sort(
+            (a,b) => +b[current].replace(/\D/g, '') - +a[current].replace(/\D/g, '')
+        )
+    }
+    return filteredUsers
+}
+
+const filterByLetters = (activeFilter, originalUsers, curent) =>{
+
+    const filteredUsers = [{
+        ...originalUsers, 
+        events: originalUsers.events.map(iv =>  ({...iv}))
+        }];
+
+
+    if(activeFilter){
+
+        filteredUsers[0].events.sort(function (a,b){
+            if (a[curent] < b[curent]) {
+                    return 1;
+                }
+                if (a[curent] > b[curent]) {
+                    return -1;
+                }
+                return 0;
+        })
+    }else{
+
+        filteredUsers[0].events.sort(function (a,b){
+            if (a[curent] > b[curent]) {
+                    return 1;
+                }
+                if (a[curent] < b[curent]) {
+                    return -1;
+                }
+                return 0;
+        })
+
+    }
+    return filteredUsers
+}
+
 export default{
     name: 'SingleUser',
     data(){
         return{
             users:[],
             showModal: false,
+            filteredEvents: false,
+            activeFilter:'',
         }
     },
 
@@ -90,9 +181,8 @@ export default{
     },
 methods: {
     // PUT request to update user information
+    
     async updateUser() {
-        
-// this.getNearestData([...this.users[0].closestEvent, document.getElementById('startRegister').value])
       await fetch(`http://localhost:3000/api/users/edit/${this.$route.params.id}`, {
         method: 'PUT',
         headers: { 'Content-type': 'application/json' },
@@ -122,10 +212,10 @@ methods: {
         console.error(err);
       });
     },
-        getNearestData(dataArr){
+
+    getNearestData(dataArr){
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
         const index = dataArr
                 .map((data, orginalIndex) => {
                     const [y,m,d] = data.split('-');
@@ -135,7 +225,37 @@ methods: {
                 .find(item => item.sorter >= today)
                 ?.orginalIndex;
             return dataArr[index] ;
-    }
+    },
+
+    onFiltersClick(e){
+        
+        if(this.activeFilter !== e.target.dataset.filter) this.activeFilter = '';
+        
+        this.activeFilter ? 
+            this.activeFilter = '' : 
+            this.activeFilter = e.target.dataset.filter;
+
+        switch(e.target.dataset.filter){
+            case 'default':
+                this.filteredEvents =[{
+                    ...this.users[0], 
+                    events: this.users[0].events.map( 
+                        ivent => ({...ivent}) ) 
+                    }];
+                break;
+            case 'eventStart':
+                this.filteredEvents = filterByDateEvent(this.activeFilter, this.users[0], e.target.dataset.filter);
+                break;
+            case 'eventEnd':
+                this.filteredEvents = filterByDateEvent(this.activeFilter, this.users[0], e.target.dataset.filter)
+                break;
+            default:
+                console.log(e.target.dataset.filter);
+                this.filteredEvents = filterByLetters (this.activeFilter, this.users[0], e.target.dataset.filter);
+                break;
+        }
+        
+    },
 
   },
     computed: {
@@ -148,6 +268,14 @@ methods: {
 </script>
 
 <style>
+    th {
+    padding-left: 1.2rem;
+    cursor: pointer;
+    transition: all .2s linear;
+    }
+    th:hover{
+        background-color: antiquewhite;
+    }
     .test{
         margin-top: 100px;
     }

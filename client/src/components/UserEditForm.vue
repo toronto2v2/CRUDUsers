@@ -7,25 +7,44 @@
         <form>
           <div class="form-group">
             <label for="">Name</label>
-            <input v-bind:value="user.name" required type="text" id="nameEdit" class="form-control"/>
+            <input v-bind:value="user.name" 
+                   required type="text" 
+                   id="nameEdit" 
+                   class="form-control"/>
           </div>
             <div class="form-group">
             <label for="">Surname</label>
-            <input v-bind:value="user.surname" required type="text" id="surnameEdit" class="form-control"/>
+            <input v-bind:value="user.surname" 
+                   required type="text" 
+                   id="surnameEdit" 
+                   class="form-control"/>
           </div>
           <div class="form-group">
             <label for="">Email</label>
-            <input v-bind:value="user.email" required type="text" id="emailEdit" class="form-control"/>
+            <input v-bind:value="user.email" 
+                   required type="text" 
+                   id="emailEdit" 
+                   class="form-control"/>
           </div>
           
           <div class="form-group">
             <label for="">Number</label>
-            <input v-bind:value="user.number" required type="number" id="numberEdit" class="form-control"/>
+            <input v-bind:value="user.number" 
+                   required type="number" 
+                   id="numberEdit" 
+                   class="form-control"/>
           </div>
 
           <!-- when clicked, "showModal" becomes false -->
-          <button v-on:click.prevent="showModal = !showModal" class="btn btn-secondary mr-1">Cancel</button>
-          <button v-on:click="updateUser(user._id)" type="submit" class="btn btn-primary">Submit</button> 
+          <button v-on:click.prevent="showModal = !showModal" 
+                  class="btn btn-secondary mr-1">
+                  Cancel
+          </button>
+          <button v-on:click="updateUser(user._id)" 
+                  type="submit" 
+                  class="btn btn-primary">
+                  Submit
+          </button> 
         </form>
       </div>
     </div>
@@ -69,7 +88,8 @@ export default {
     },
 
   },
-  // When creating the component, we receive the data emitted from 'EventBus' here in this component
+  // When creating the component, we receive the data emitted 
+  //   from 'EventBus' here in this component
   created() {
     // click event
     EventBus.$on('click', (modal, user) => {
@@ -89,5 +109,4 @@ export default {
 </script>
 
 <style>
-/* It is using the same stylization as the registration modal */
 </style>

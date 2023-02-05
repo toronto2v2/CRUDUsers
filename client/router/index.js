@@ -1,17 +1,17 @@
 import VueRouter from "vue-router";
-import singleUser from '../src/components/singleUser.vue';
-import MainPage from '../src/components/MainPage.vue'
+import singleUser from "../src/components/singleUser.vue";
+import MainPage from "../src/components/MainPage.vue";
 
 export default new VueRouter({
-    mode: 'history',
+    mode: "history",
     routes: [
         {
-            path:'/',
+            path: "/",
             component: MainPage,
         },
-       {
-            path:'/user/:id',
+        {
+            path: "/user/:id",
             component: singleUser,
         },
-    ]
-})
+    ],
+});
