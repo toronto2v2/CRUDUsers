@@ -4,35 +4,47 @@
     <div v-bind:class="modalClass" class="modal-container">
       <div class="user-modal">
         <h3  class="text-info">Edit User</h3>
-        <form>
-          <div class="form-group">
+        <form novalidate="true">
+          <div class="form-group form-group_modifyed">
             <label for="">Name</label>
-            <input v-bind:value="user.name" 
+            <input v-model="nameInput" 
                    required type="text" 
-                   id="nameEdit" 
-                   class="form-control"/>
+                   id="nameEdit"
+                   name='name' 
+                   class="form-control"
+                   @input="validateInput"/>
+            <div v-if="nameInputValid" class="validationWarning">{{nameInputValid}}</div>
           </div>
-            <div class="form-group">
+            <div class="form-group form-group_modifyed">
             <label for="">Surname</label>
-            <input v-bind:value="user.surname" 
+            <input v-model="surnameInput" 
                    required type="text" 
+                   name='surname' 
                    id="surnameEdit" 
-                   class="form-control"/>
+                   class="form-control"
+                   @input="validateInput"/>
+            <div v-if="surnameInputValid" class="validationWarning">{{surnameInputValid}}</div>
           </div>
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="">Email</label>
-            <input v-bind:value="user.email" 
+            <input v-model="emailInput" 
                    required type="text" 
+                   name='email' 
                    id="emailEdit" 
-                   class="form-control"/>
+                   class="form-control"
+                   @input="validateInput"/>
+            <div v-if="emailInputValid" class="validationWarning">{{emailInputValid}}</div>
           </div>
           
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="">Number</label>
-            <input v-bind:value="user.number" 
-                   required type="number" 
+            <input v-model="numberInput"
+                   required type="number"
+                   name='number'  
                    id="numberEdit" 
-                   class="form-control"/>
+                   class="form-control"
+                   @input="validateInput"/>
+            <div v-if="numberInputValid" class="validationWarning">{{numberInputValid}}</div>
           </div>
 
           <!-- when clicked, "showModal" becomes false -->
@@ -40,9 +52,10 @@
                   class="btn btn-secondary mr-1">
                   Cancel
           </button>
-          <button v-on:click="updateUser(user._id)" 
+          <button v-on:click="updateUser(user._id); onModalCancel()" 
                   type="submit" 
-                  class="btn btn-primary">
+                  class="btn btn-primary"
+                  :disabled="isSubmitDisabled">
                   Submit
           </button> 
         </form>
@@ -61,7 +74,21 @@ export default {
     return {
       users: [],
       user: '',
-      showModal: false
+      showModal: false,
+
+      nameInput:'',
+      nameInputValid:false,
+
+      surnameInput:'',
+      surnameInputValid:false,
+
+      emailInput: '',
+      emailInputValid:false,
+
+      numberInput: '',
+      numberInputValid:false,
+
+      isSubmitDisabled: false,
     }
   },
   methods: {
@@ -87,14 +114,87 @@ export default {
       });
     },
 
+    
+    validateInput(e){
+        switch(e.target.name){
+            case 'name':{
+                if(this.nameInput.length == 0 && this.nameInput.length < 2 ){
+                    this.nameInputValid = 'Please write more than 2 letters'
+                }else if(this.nameInput){
+                    this.nameInputValid = /[^a-zа-яё ]/iu.test(this.nameInput) ? 'Please use only letters' : false
+                }else{
+                    this.nameInputValid = ''
+                }
+            }
+            break;
+
+            case 'surname': {
+                if(this.surnameInput.length == 0 && this.surnameInput.length < 2 ){
+                    this.surnameInputValid = 'Please write more than 2 letters'
+                }else if(this.surnameInput){
+                    this.surnameInputValid = /[^a-zа-яё ]/iu.test(this.surnameInput) ? 'Please use only letters' : false
+                }else{
+                    this.surnameInputValid = ''
+                }
+            }
+            break;
+
+            case 'email': {
+                if(this.emailInput.length == 0){
+                    this.emailInputValid = 'Write your email';
+                }else if (this.emailInput){
+                    this.emailInputValid = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                                          .test(this.emailInput) ? 
+                                           false : 'Please write valid email'
+                }else{
+                    this.emailInputValid = ''
+                }
+            }
+            break;
+
+            case 'number':{
+                if(this.numberInput.length >= 0 && this.numberInput.length < 10){
+                    this.numberInputValid = 'Your number is too short';
+                }else if (this.numberInput){
+                    this.numberInputValid = /^\d+$/.test(this.numberInput) ? 
+                                            false : 'Please use only numbers'
+                }else{
+                    this.numberInputValid = ''
+                }
+            }
+            break;
+            default: return
+        }
+
+        this.isSubmitDisabled = (!this.nameInputValid && this.nameInput) 
+                              && (!this.surnameInputValid && this.surnameInput)
+                              &&(!this.numberInputValid && this.numberInput) 
+                              && (!this.emailInputValid && this.emailInput) 
+                              ? false : true;
+
+    },
+
+    onModalCancel(){
+        this.nameInputValid = false;
+        this.surnameInputValid = false;
+        this.emailInputValid = false;
+        this.numberInputValid = false;
+
+    }
+
   },
+
   // When creating the component, we receive the data emitted 
   //   from 'EventBus' here in this component
   created() {
     // click event
     EventBus.$on('click', (modal, user) => {
       this.showModal = !modal;
-      this.user = user;
+      this.nameInput = user.name;
+      this.surnameInput = user.surname;
+      this.emailInput = user.email;
+      this.numberInput = user.number;
+
 
     })
   },
