@@ -60,27 +60,51 @@
       <div class="user-modal">
         <h3 class="text-primary">Add new event</h3>
         <form>
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="titleRegister">Title</label>
-            <input required value="" type="text" id="titleRegister" class="form-control"/>
+            <input required value="" 
+                   type="text" 
+                   id="titleRegister" 
+                   class="form-control"
+                   name="title"
+                   v-model="titleInput"
+                   @input="validateInput"/>
+                   <div v-if="titleInputValid" class="validationWarning">{{titleInputValid}}</div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="descriptionRegister">Description</label>
             <input required value="" 
-                   name='surname' 
                    type="text" id="descriptionRegister" 
-                   class="form-control"/>
+                   class="form-control"
+                   name="descr"
+                   v-model="descrInput"
+                   @input="validateInput"/>
+                   <div v-if="descrInputValid" class="validationWarning">{{descrInputValid}}</div>
           </div>
     
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="startRegister">Start date</label>
-            <input required value="" type="date" id="startRegister" class="form-control"/>
+            <input required value="" 
+                   type="date" 
+                   id="startRegister" 
+                   class="form-control"
+                   name="startDate"
+                   v-model="startDateInput"
+                   @input="validateInput"/>
+                   <div v-if="startDateInputValid" class="validationWarning">{{startDateInputValid}}</div>
           </div>
           
-          <div class="form-group">
+          <div class="form-group form-group_modifyed">
             <label for="endRegister">End date</label>
-            <input required value="" type="date" id="endRegister" class="form-control"/>
+            <input required value="" 
+                   type="date" 
+                   id="endRegister" 
+                   class="form-control"
+                   name="endDate"
+                   @input="validateInput"
+                   v-model="endDateInput"/>
+                   <div v-if="endDateInputValid" class="validationWarning">{{endDateInputValid}}</div>
           </div>
           
           <!-- when clicked, "showModal" becomes false -->
@@ -91,6 +115,7 @@
           <button v-on:click="updateUser()"  
                   type="submit" 
                   class="btn btn-primary"
+                  :disabled="isSubmitDisabled"
                   >Submit
           </button> 
         </form>
@@ -166,6 +191,20 @@ export default{
             showModal: false,
             filteredEvents: false,
             activeFilter:'',
+
+            titleInput:'',
+            titleInputValid:false,
+
+            descrInput:'',
+            descrInputValid:false,
+
+            startDateInput: '',
+            startDateInputValid:false,
+
+            endDateInput: '',
+            endDateInputValid:false,
+
+            isSubmitDisabled: true,
         }
     },
 
@@ -257,6 +296,73 @@ methods: {
         
     },
 
+    validateInput(e){
+        switch(e.target.name){
+            case 'startDate':{
+                if(this.startDateInput.length == 0 && this.startDateInput.length < 8 ){
+                    this.startDateInputValid = 'Please write correct date'
+                }else if(this.startDateInput){
+                    const status = this.users[0].events.some(
+                        el => (+el.eventStart.replace(/-/g, '') <= +this.startDateInput.replace(/-/g, '') 
+                              && +this.startDateInput.replace(/-/g, '') <= +el.eventEnd.replace(/-/g, ''))
+                    
+                    )
+                    console.log(`status`);
+                    this.startDateInputValid = status ? 'You already have event for this date' : false
+                }else{
+                    this.startDateInputValid = ''
+                }
+            }
+            break;
+
+            case 'endDate': {
+                console.log(`end`);
+                if(this.endDateInput.length == 0 && this.endDateInput.length < 8 ){
+                    this.endDateInputValid = 'Please write correct date'
+                }else if(this.endDateInput){
+                        const status = this.users[0].events.some(
+                        el => (+el.eventEnd.replace(/-/g, '') >= +this.endDateInput.replace(/-/g, '') 
+                              && +this.endDateInput.replace(/-/g, '') >= +el.eventStart.replace(/-/g, ''))
+                              
+                    )
+                    console.log(`status2`);
+                    this.endDateInputValid = status ? 'You already have event for this date' : false
+                }else{
+                    this.endDateInputValid = ''
+                }
+            }
+            break;
+
+            case 'title':{
+                if(this.titleInput.length == 0 || this.titleInput.length < 5 ){
+                    this.titleInputValid = 'Please write longer title'
+                }else{
+                    this.titleInputValid = ''
+                }
+            }
+            break;
+
+            case 'descr':{
+                if(this.descrInput.length == 0 || this.descrInput.length < 10 ){
+                    this.descrInputValid = 'Please write longer description'
+                }else{
+                    this.descrInputValid = ''
+                }
+            }
+            
+        }
+
+        this.isSubmitDisabled = (!this.titleInputValid && this.titleInput) 
+                              && (!this.descrInputValid && this.descrInput)
+                              &&(!this.startDateInputValid && this.startDateInput) 
+                              && (!this.endDateInputValid && this.endDateInput) 
+                              ? false : true;
+
+    },
+
+    log(){
+        console.log(this.startDateInput);
+    }
   },
     computed: {
         modalClass() {
@@ -268,6 +374,19 @@ methods: {
 </script>
 
 <style>
+.btn-group{
+    margin-top: 5px;
+}
+.form-group_modifyed{
+    position: relative;
+    margin-bottom: 25px;
+}
+.validationWarning{
+    color: rgba(192, 57, 33, 0.856);
+    position: absolute;
+    bottom: 0;
+    transform: translateY(100%);
+}
     th {
     padding-left: 1.2rem;
     cursor: pointer;
