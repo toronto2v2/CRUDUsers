@@ -108,7 +108,8 @@
           </div>
           
           <!-- when clicked, "showModal" becomes false -->
-          <button v-on:click.prevent="showModal = !showModal" 
+          <button v-on:click.prevent="showModal = !showModal
+                  onModalCancel()" 
                   class="btn btn-secondary mr-1"
                   >Cancel
           </button>
@@ -360,8 +361,12 @@ methods: {
 
     },
 
-    log(){
-        console.log(this.startDateInput);
+    onModalCancel(){
+        this.titleInputValid = false;
+        this.descrInputValid = false;
+        this.startDateInputValid = false;
+        this.endDateInputValid = false;
+
     }
   },
     computed: {
