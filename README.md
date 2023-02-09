@@ -1,7 +1,7 @@
 # CRUDUsers
 Crud Test Task
+## Instalatinon:
 
-###Instalatinon
     1.git clone https://github.com/toronto2v2/CRUDUsers.git
     2. cd vuejs-crud
     3. npm install
